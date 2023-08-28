@@ -7,6 +7,11 @@ This is a open-source free version of [TinyPNG](www.tinypng.com)
 You will need
 > * Node.js >= v14.x.x
 
+Make sure to create the following 2 directories in root
+
+* `uploads`
+* `outputs`
+
 Then you can just install project deps:
 ```shell
 yarn
