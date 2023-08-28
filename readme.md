@@ -1,6 +1,6 @@
 # Free Tiny PNG Clone
 
-This is a open-source free version of [TinyPNG](www.tinypng.com)
+This is a open-source free version of [TinyPNG](https://www.tinypng.com)
 
 ## Getting started
 
