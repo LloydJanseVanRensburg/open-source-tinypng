@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Free TinyPng</title>
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: Arial,serif;
+        }
+
+        h1 {
+            padding: 2rem;
+            text-align: center;
+            background-color: #f3f3f3;
+        }
+
+        #download-links,
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f3f3f3;
+            padding: 2rem;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background-color: black;
+            color: white;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+
+            &:hover {
+                opacity: 0.8;
+            }
+
+            &:disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+            }
+        }
+
+        #container {
+            position: relative;
+            padding-top: 2rem;
+        }
+
+        #notifications {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            & p {
+                padding: 8px;
+                text-align: center;
+                min-width: 200px;
+                color: black;
+
+                &.success {
+                    background-color: limegreen;
+                }
+                &.error {
+                    background-color: red;
+                }
+                &.info {
+                    background-color: deepskyblue;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Free TinyPNG</h1>
+
+    <div id="container">
+        <form id="form" enctype="multipart/form-data">
+            <label for="files">Select files to optimize</label>
+            <input type="file" multiple name="files" id="files" />
+            <button type="submit" id="upload-btn">Submit</button>
+        </form>
+
+        <div id="download-links"></div>
+        <div id="notifications"></div>
+    </div>
+
+    <script>
+        const btn = document.querySelector('#upload-btn');
+        const downloadLinksDiv = document.querySelector('#download-links');
+        const notificationsDiv = document.querySelector('#notifications');
+
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.querySelector('#files');
+            const file = fileInput.files[0];
+
+            if(!file) {
+                return alert('No file selected')
+            }
+
+            const formData = new FormData();
+            for(const file of fileInput.files) {
+                formData.append('files', file);
+            }
+
+            try {
+                btn.disabled = true;
+                notificationsDiv.innerHTML = '';
+                const loadingP = document.createElement('p');
+                loadingP.innerText = 'Processing...';
+                loadingP.className = 'info';
+                notificationsDiv.appendChild(loadingP);
+
+                const res = await fetch('/reduce-images', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if(!res.ok) {
+                    return alert('Something went wrong');
+                }
+
+                const { downloads } = await res.json();
+
+                downloadLinksDiv.innerHTML = '';
+
+                for (const download of downloads) {
+                    const link = document.createElement('a');
+                    link.href = download;
+                    link.innerText = 'Download image here';
+                    downloadLinksDiv.appendChild(link);
+                }
+
+                notificationsDiv.innerHTML = '';
+                const successP = document.createElement('p');
+                successP.innerText = 'Success';
+                successP.className = 'success';
+                notificationsDiv.appendChild(successP);
+
+                fileInput.value = '';
+            } catch (e) {
+                notificationsDiv.innerHTML = '';
+                const errorP = document.createElement('p');
+                errorP.innerText = 'Something went wrong';
+                errorP.className = 'error';
+                notificationsDiv.appendChild(errorP);
+            } finally {
+                btn.disabled = false;
+                setTimeout(() => {
+                    notificationsDiv.innerHTML = '';
+                }, 5000)
+            }
+        })
+    </script>
+</body>
+</html>
