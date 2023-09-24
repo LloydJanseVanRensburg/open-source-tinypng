@@ -11,6 +11,7 @@ Make sure to create the following 2 directories in root
 
 * `uploads`
 * `outputs`
+* `beforeZip`
 
 Then you can just install project deps:
 ```shell

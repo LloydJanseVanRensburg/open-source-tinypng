@@ -90,7 +90,8 @@
         <form id="form" enctype="multipart/form-data">
             <label for="files">Select files to optimize</label>
             <input type="file" multiple name="files" id="files" />
-            <button type="submit" id="upload-btn">Submit</button>
+            <button type="submit" id="upload-btn">Optimize Files</button>
+            <button type="submit" id="upload-btn-zip">Optimize and Zip Files </button>
         </form>
 
         <div id="download-links"></div>
@@ -99,10 +100,12 @@
 
     <script>
         const btn = document.querySelector('#upload-btn');
+        const btnWithZip = document.querySelector("#upload-btn-zip");
+
         const downloadLinksDiv = document.querySelector('#download-links');
         const notificationsDiv = document.querySelector('#notifications');
 
-        btn.addEventListener('click', async (e) => {
+        async function handleClick(zip, e){
             e.preventDefault();
 
             const fileInput = document.querySelector('#files');
@@ -116,9 +119,12 @@
             for(const file of fileInput.files) {
                 formData.append('files', file);
             }
+            // this adds whether to zip the files or not, only second button will set this to true.
+            formData.append("zip", zip);
 
             try {
                 btn.disabled = true;
+                btnWithZip.disabled = true;
                 notificationsDiv.innerHTML = '';
                 const loadingP = document.createElement('p');
                 loadingP.innerText = 'Processing...';
@@ -160,11 +166,16 @@
                 notificationsDiv.appendChild(errorP);
             } finally {
                 btn.disabled = false;
+                btnWithZip.disabled = false;
                 setTimeout(() => {
                     notificationsDiv.innerHTML = '';
                 }, 5000)
             }
-        })
+        }
+        
+        btn.addEventListener('click', handleClick.bind(btn, false));
+        btnWithZip.addEventListener('click', handleClick.bind(btnWithZip, true));
+
     </script>
 </body>
 </html>
