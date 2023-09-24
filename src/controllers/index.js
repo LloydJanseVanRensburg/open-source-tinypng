@@ -2,7 +2,7 @@ import path from "path";
 import reduceImageSize from "../utils/imageReducer.js";
 import deleteUploadedImage from "../utils/deleteUploadedImage.js";
 import fileDirName from "../utils/dirname.js";
-import { compressFiles } from "../utils/compressFiles.js";
+import compressFiles from "../utils/compressFiles.js";
 
 
 const { __dirname } = fileDirName(import.meta);
@@ -19,30 +19,50 @@ export async function getHomePage(req, res) {
 
 export async function postReduceImages(req, res) {
     const files = req.files;
-
+    const zipFiles = req.body.zip === 'true' ? true : false;
     const beforeZipLinks = [];
     const asyncOperations = [];
 
     try {
-        for (const file of files) {
+        for await (const file of files) {
             const { filename, originalname } = file;
             const uploadedFilePath = path.join(__dirname, '..', '..', 'uploads', filename);
 
-            const outputFilePath = path.join(__dirname, '..', '..', 'beforeZip', filename);
+            let outputFilePath;
+
+            if (zipFiles) {
+                outputFilePath = path.join(__dirname, '..', '..', 'beforeZip', filename);
+            } else {
+                outputFilePath = path.join(__dirname, '..', '..', 'outputs', originalname);
+            }
 
             await reduceImageSize(uploadedFilePath, outputFilePath);
             await deleteUploadedImage(uploadedFilePath);
+
             beforeZipLinks.push(
                 {
                     fileName: filename,
                     originalName: originalname,
                 });
+
         }
 
-        await compressFiles(beforeZipLinks, (download) => {
-            console.log(download);
-            return res.send({ success: 'true', downloads: [`/download/${download}`] });
-        });
+        if (zipFiles) {
+            await compressFiles(beforeZipLinks, (download) => {
+                return res.send({
+                    success: 'true',
+                    downloads: [`/download/${download}`]
+                });
+            });
+        } else {
+            return res.send({
+                success: 'true',
+                downloads: beforeZipLinks.map(val => {
+                    return `/download/${val.originalName}`;
+                })
+            })
+        }
+
     } catch (e) {
         console.error(e);
         res.status(500).send({ error: 'Server error' })

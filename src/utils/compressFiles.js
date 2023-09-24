@@ -45,4 +45,4 @@ async function compressFiles(fileLinks, callback) {
 
     await archive.finalize();
 }
-export { compressFiles };
+export default compressFiles;
