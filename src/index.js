@@ -18,9 +18,11 @@ app.listen('3000', async () => {
     try {
         const uploadsDirPath = path.join(__dirname, '..', 'uploads');
         const outputsDirPath = path.join(__dirname, '..', 'outputs');
+        const beforeZipDirPath = path.join(__dirname, "..", "beforeZip");
 
         const hasUploadsDir = await checkDirExists(uploadsDirPath);
         const hasOutputsDir = await checkDirExists(outputsDirPath);
+        const hasBeforeZipDir = await checkDirExists(beforeZipDirPath);
 
         if (hasUploadsDir) {
             await clearDir(uploadsDirPath);
@@ -32,6 +34,12 @@ app.listen('3000', async () => {
             await clearDir(outputsDirPath);
         } else {
             await createDir(outputsDirPath);
+        }
+
+        if (hasBeforeZipDir) {
+            await clearDir(hasBeforeZipDir);
+        } else {
+            await createDir(hasBeforeZipDir);
         }
 
         console.log('Server running on port 3000');
