@@ -37,9 +37,9 @@ app.listen('3000', async () => {
         }
 
         if (hasBeforeZipDir) {
-            await clearDir(hasBeforeZipDir);
+            await clearDir(beforeZipDirPath);
         } else {
-            await createDir(hasBeforeZipDir);
+            await createDir(beforeZipDirPath);
         }
 
         console.log('Server running on port 3000');
